@@ -3,6 +3,9 @@ package com.example.sourcehub.data.local.mock
 import com.example.sourcehub.domain.model.*
 
 class MockDataProvider {
+    // Shared payment state: orderId -> (transactionId, paidTimestamp)
+    val paidOrders = mutableMapOf<String, Pair<String, Long>>()
+
     val categories = listOf(
         Category("cat_1", "简历模板", "description", 0, 42),
         Category("cat_2", "PPT模板", "slideshow", 1, 38),

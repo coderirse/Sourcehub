@@ -12,13 +12,17 @@ class MockPaymentApi(private val mockDataProvider: com.example.sourcehub.data.lo
         delay(1500) // Simulate payment processing
         val success = Random.nextInt(10) > 1 // 90% success rate
         return if (success) {
+            val txnId = "txn_${SecurityUtils.generateUuid().take(12)}"
+            val ts = System.currentTimeMillis()
+            // Mark order as paid so MockOrderApi picks it up
+            mockDataProvider.paidOrders[request.orderId] = Pair(txnId, ts)
             ApiResponse(
                 data = PaymentResponse(
-                    transactionId = "txn_${SecurityUtils.generateUuid().take(12)}",
+                    transactionId = txnId,
                     orderId = request.orderId,
                     status = "SUCCESS",
                     amount = request.amount,
-                    timestamp = System.currentTimeMillis()
+                    timestamp = ts
                 )
             )
         } else {
