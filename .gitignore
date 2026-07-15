@@ -15,3 +15,5 @@
 local.properties
 RELEASE_WORKFLOW.md
 hs_err_*.log
+server/data/
+server/uploads/
