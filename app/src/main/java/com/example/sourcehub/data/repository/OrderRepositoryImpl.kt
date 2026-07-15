@@ -7,7 +7,8 @@ import com.example.sourcehub.domain.model.*
 import com.example.sourcehub.domain.repository.OrderRepository
 import com.example.sourcehub.presentation.common.state.Resource
 
-class OrderRepositoryImpl(private val orderApi: OrderApi) : OrderRepository {
+class OrderRepositoryImpl(private var orderApi: OrderApi) : OrderRepository {
+    fun swapApi(api: OrderApi) { orderApi = api }
 
     override suspend fun createOrder(userId: String, items: List<Pair<String, Int>>, couponCode: String): Resource<Order> {
         return try {

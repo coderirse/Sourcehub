@@ -47,6 +47,14 @@ fun SettingsScreen(
                 },
                 leadingContent = { Icon(Icons.Default.Fingerprint, null) }
             )
+            ListItem(
+                headlineContent = { Text("使用远程服务器") },
+                supportingContent = { Text("连接 Ktor 后端 API（需先启动 server/）") },
+                trailingContent = {
+                    Switch(checked = uiState.useRemoteApi, onCheckedChange = viewModel::toggleRemoteApi)
+                },
+                leadingContent = { Icon(Icons.Default.Cloud, null) }
+            )
             HorizontalDivider(Modifier.padding(horizontal = 16.dp))
 
             ListItem(

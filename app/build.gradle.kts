@@ -11,8 +11,8 @@ android {
         applicationId = "com.example.sourcehub"
         minSdk = 24
         targetSdk = 37
-        versionCode = 5
-        versionName = "1.1.0"
+        versionCode = 6
+        versionName = "1.1.1"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -57,9 +57,12 @@ dependencies {
     // Coil
     implementation(libs.coil.compose)
 
-    // OkHttp
+    // OkHttp + Retrofit
     implementation(libs.okhttp)
     implementation(libs.okhttp.logging)
+    implementation("com.squareup.retrofit2:retrofit:2.11.0")
+    implementation("com.squareup.retrofit2:converter-gson:2.11.0")
+    implementation("com.google.code.gson:gson:2.11.0")
 
     // DataStore
     implementation(libs.androidx.datastore.preferences)

@@ -8,9 +8,10 @@ import com.example.sourcehub.domain.model.PaymentResult
 import com.example.sourcehub.domain.repository.PaymentRepository
 
 class PaymentRepositoryImpl(
-    private val paymentApi: PaymentApi,
+    private var paymentApi: PaymentApi,
     private val orderApi: OrderApi
 ) : PaymentRepository {
+    fun swapApi(api: PaymentApi) { paymentApi = api }
 
     override suspend fun processPayment(orderId: String, amount: Double, method: PaymentMethod): PaymentResult {
         return try {

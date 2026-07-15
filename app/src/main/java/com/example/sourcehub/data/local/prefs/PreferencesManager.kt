@@ -62,10 +62,20 @@ class PreferencesManager(private val context: Context) {
         context.dataStore.edit { it[KEY_BIOMETRIC_LOCK] = enabled }
     }
 
+    // Remote API mode
+    val useRemoteApi: Flow<Boolean> = context.dataStore.data.map { prefs ->
+        prefs[KEY_REMOTE_API] ?: false
+    }
+
+    suspend fun setUseRemoteApi(enabled: Boolean) {
+        context.dataStore.edit { it[KEY_REMOTE_API] = enabled }
+    }
+
     companion object {
         private val KEY_RECENT_SEARCHES = stringPreferencesKey("recent_searches")
         private val KEY_WIFI_ONLY = booleanPreferencesKey("wifi_only_download")
         private val KEY_BIOMETRIC_LOCK = booleanPreferencesKey("biometric_lock")
+        private val KEY_REMOTE_API = booleanPreferencesKey("use_remote_api")
         private const val MAX_RECENT_SEARCHES = 10
         private const val SEPARATOR = "|||"
     }

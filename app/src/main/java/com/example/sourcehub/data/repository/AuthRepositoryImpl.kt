@@ -15,11 +15,13 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
 class AuthRepositoryImpl(
-    private val authApi: AuthApi,
+    private var authApi: AuthApi,
     private val tokenManager: TokenManager,
     private val preferencesManager: PreferencesManager,
     private val db: SourcehubDbHelper
 ) : AuthRepository {
+
+    fun swapApi(api: AuthApi) { authApi = api }
 
     private val _currentUser = MutableStateFlow<User?>(null)
 

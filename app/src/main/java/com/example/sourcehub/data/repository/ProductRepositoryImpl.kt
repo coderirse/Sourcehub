@@ -8,7 +8,8 @@ import com.example.sourcehub.domain.model.*
 import com.example.sourcehub.domain.repository.ProductRepository
 import com.example.sourcehub.presentation.common.state.Resource
 
-class ProductRepositoryImpl(private val productApi: ProductApi) : ProductRepository {
+class ProductRepositoryImpl(private var productApi: ProductApi) : ProductRepository {
+    fun swapApi(api: ProductApi) { productApi = api }
 
     override suspend fun getBanners(): Resource<List<Banner>> {
         return try {

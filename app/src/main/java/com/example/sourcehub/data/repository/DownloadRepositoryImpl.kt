@@ -16,9 +16,10 @@ import kotlinx.coroutines.flow.map
 import java.util.concurrent.TimeUnit
 
 class DownloadRepositoryImpl(
-    private val downloadApi: DownloadApi,
+    private var downloadApi: DownloadApi,
     private val db: SourcehubDbHelper
 ) : DownloadRepository {
+    fun swapApi(api: DownloadApi) { downloadApi = api }
     private val _downloads = MutableStateFlow<List<Download>>(emptyList())
 
     init {
