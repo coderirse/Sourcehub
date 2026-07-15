@@ -1,4 +1,8 @@
 # SourceHub ProGuard Rules
+
+# Keep Room entities
+-keep class com.example.sourcehub.data.local.db.entity.** { *; }
+
 # Keep domain models
 -keep class com.example.sourcehub.domain.model.** { *; }
 
@@ -9,9 +13,7 @@
 -keep class com.example.sourcehub.data.remote.dto.** { *; }
 
 # Keep security classes
--keep class com.example.sourcehub.security.** {
-    public <methods>;
-}
+-keep class com.example.sourcehub.security.** { public <methods>; }
 
 # Remove logging in release
 -assumenosideeffects class android.util.Log {

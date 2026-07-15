@@ -12,44 +12,29 @@ class PaymentRepositoryImpl(
     private val orderApi: OrderApi
 ) : PaymentRepository {
 
-    override suspend fun processPayment(
-        orderId: String, amount: Double, method: PaymentMethod
-    ): PaymentResult {
+    override suspend fun processPayment(orderId: String, amount: Double, method: PaymentMethod): PaymentResult {
         return try {
             val resp = paymentApi.createPayment(CreatePaymentRequest(orderId, amount, method.name))
             if (resp.code == 200 && resp.data != null) {
-                if (resp.data.status == "SUCCESS") {
-                    PaymentResult.Success(resp.data.transactionId, orderId, amount, resp.data.timestamp)
-                } else {
-                    PaymentResult.Failure(resp.data.errorCode, resp.data.errorMessage)
-                }
-            } else {
-                PaymentResult.Failure("ERROR", resp.message)
-            }
-        } catch (e: Exception) {
-            PaymentResult.Failure("NETWORK_ERROR", e.message ?: "支付服务不可用")
-        }
+                if (resp.data.status == "SUCCESS") PaymentResult.Success(resp.data.transactionId, orderId, amount, resp.data.timestamp)
+                else PaymentResult.Failure(resp.data.errorCode, resp.data.errorMessage)
+            } else PaymentResult.Failure("ERROR", resp.message)
+        } catch (e: Exception) { PaymentResult.Failure("NETWORK_ERROR", e.message ?: "支付服务不可用") }
     }
 
     override suspend fun verifyPayment(transactionId: String): PaymentResult {
         return try {
             val resp = paymentApi.verifyPayment(transactionId)
-            if (resp.code == 200 && resp.data != null) {
-                PaymentResult.Success(transactionId, resp.data.orderId, resp.data.amount)
-            } else PaymentResult.Failure("VERIFY_FAILED", resp.message)
-        } catch (e: Exception) {
-            PaymentResult.Failure("ERROR", e.message ?: "验证失败")
-        }
+            if (resp.code == 200 && resp.data != null) PaymentResult.Success(transactionId, resp.data.orderId, resp.data.amount)
+            else PaymentResult.Failure("VERIFY_FAILED", resp.message)
+        } catch (e: Exception) { PaymentResult.Failure("ERROR", e.message ?: "验证失败") }
     }
 
     override suspend fun refundPayment(orderId: String): PaymentResult {
         return try {
             val resp = paymentApi.refundPayment(orderId)
-            if (resp.code == 200 && resp.data != null) {
-                PaymentResult.Success(resp.data.transactionId, orderId, resp.data.amount)
-            } else PaymentResult.Failure("REFUND_FAILED", resp.message)
-        } catch (e: Exception) {
-            PaymentResult.Failure("ERROR", e.message ?: "退款失败")
-        }
+            if (resp.code == 200 && resp.data != null) PaymentResult.Success(resp.data.transactionId, orderId, resp.data.amount)
+            else PaymentResult.Failure("REFUND_FAILED", resp.message)
+        } catch (e: Exception) { PaymentResult.Failure("ERROR", e.message ?: "退款失败") }
     }
 }

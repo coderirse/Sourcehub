@@ -2,6 +2,7 @@ package com.example.sourcehub.di
 
 import android.content.Context
 import com.example.sourcehub.data.local.mock.MockDataProvider
+import com.example.sourcehub.data.local.persistence.JsonPersistenceManager
 import com.example.sourcehub.data.local.prefs.PreferencesManager
 import com.example.sourcehub.data.remote.mock.MockAuthApi
 import com.example.sourcehub.data.remote.mock.MockDownloadApi
@@ -31,6 +32,9 @@ class AppContainer(context: Context) {
     // Security
     val tokenManager = TokenManager(applicationContext)
 
+    // Persistence (JSON-file based, zero annotation processing)
+    val persistenceManager = JsonPersistenceManager(applicationContext)
+
     // Mock Data
     val mockDataProvider = MockDataProvider()
 
@@ -42,25 +46,10 @@ class AppContainer(context: Context) {
     val mockDownloadApi = MockDownloadApi(mockDataProvider)
 
     // Repositories
-    val authRepository: AuthRepository = AuthRepositoryImpl(
-        mockAuthApi, tokenManager, preferencesManager
-    )
-
-    val productRepository: ProductRepository = ProductRepositoryImpl(
-        mockProductApi
-    )
-
-    val orderRepository: OrderRepository = OrderRepositoryImpl(
-        mockOrderApi
-    )
-
-    val paymentRepository: PaymentRepository = PaymentRepositoryImpl(
-        mockPaymentApi, mockOrderApi
-    )
-
-    val downloadRepository: DownloadRepository = DownloadRepositoryImpl(
-        mockDownloadApi
-    )
-
-    val cartRepository: CartRepository = CartRepositoryImpl()
+    val authRepository: AuthRepository = AuthRepositoryImpl(mockAuthApi, tokenManager, preferencesManager, persistenceManager)
+    val productRepository: ProductRepository = ProductRepositoryImpl(mockProductApi)
+    val orderRepository: OrderRepository = OrderRepositoryImpl(mockOrderApi)
+    val paymentRepository: PaymentRepository = PaymentRepositoryImpl(mockPaymentApi, mockOrderApi)
+    val downloadRepository: DownloadRepository = DownloadRepositoryImpl(mockDownloadApi, persistenceManager)
+    val cartRepository: CartRepository = CartRepositoryImpl(persistenceManager)
 }
