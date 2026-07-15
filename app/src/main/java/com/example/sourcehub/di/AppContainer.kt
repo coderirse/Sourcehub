@@ -1,8 +1,8 @@
 package com.example.sourcehub.di
 
 import android.content.Context
+import com.example.sourcehub.data.local.db.SourcehubDbHelper
 import com.example.sourcehub.data.local.mock.MockDataProvider
-import com.example.sourcehub.data.local.persistence.JsonPersistenceManager
 import com.example.sourcehub.data.local.prefs.PreferencesManager
 import com.example.sourcehub.data.remote.mock.MockAuthApi
 import com.example.sourcehub.data.remote.mock.MockDownloadApi
@@ -26,14 +26,14 @@ import com.example.sourcehub.security.TokenManager
 class AppContainer(context: Context) {
     private val applicationContext = context.applicationContext
 
+    // Database (SQLite via SQLiteOpenHelper — real SQL, zero annotation processing)
+    val dbHelper = SourcehubDbHelper(applicationContext)
+
     // Preferences
     val preferencesManager = PreferencesManager(applicationContext)
 
     // Security
     val tokenManager = TokenManager(applicationContext)
-
-    // Persistence (JSON-file based, zero annotation processing)
-    val persistenceManager = JsonPersistenceManager(applicationContext)
 
     // Mock Data
     val mockDataProvider = MockDataProvider()
@@ -46,10 +46,10 @@ class AppContainer(context: Context) {
     val mockDownloadApi = MockDownloadApi(mockDataProvider)
 
     // Repositories
-    val authRepository: AuthRepository = AuthRepositoryImpl(mockAuthApi, tokenManager, preferencesManager, persistenceManager)
+    val authRepository: AuthRepository = AuthRepositoryImpl(mockAuthApi, tokenManager, preferencesManager, dbHelper)
     val productRepository: ProductRepository = ProductRepositoryImpl(mockProductApi)
     val orderRepository: OrderRepository = OrderRepositoryImpl(mockOrderApi)
     val paymentRepository: PaymentRepository = PaymentRepositoryImpl(mockPaymentApi, mockOrderApi)
-    val downloadRepository: DownloadRepository = DownloadRepositoryImpl(mockDownloadApi, persistenceManager)
-    val cartRepository: CartRepository = CartRepositoryImpl(persistenceManager)
+    val downloadRepository: DownloadRepository = DownloadRepositoryImpl(mockDownloadApi, dbHelper)
+    val cartRepository: CartRepository = CartRepositoryImpl(dbHelper)
 }

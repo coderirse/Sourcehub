@@ -1,57 +1,48 @@
 package com.example.sourcehub.data.repository
 
-import com.example.sourcehub.data.local.persistence.JsonPersistenceManager
-import com.example.sourcehub.data.local.persistence.toCartItem
-import com.example.sourcehub.data.local.persistence.toJson
+import com.example.sourcehub.data.local.db.SourcehubDbHelper
 import com.example.sourcehub.domain.model.CartItem
 import com.example.sourcehub.domain.repository.CartRepository
 import com.example.sourcehub.security.SecurityUtils
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.map
-import org.json.JSONArray
 
-class CartRepositoryImpl(private val persistence: JsonPersistenceManager) : CartRepository {
+class CartRepositoryImpl(private val db: SourcehubDbHelper) : CartRepository {
     private val _items = MutableStateFlow<List<CartItem>>(emptyList())
 
     init {
-        // Load from persisted JSON on init
         kotlinx.coroutines.runBlocking {
-            val arr = persistence.loadArray("cart_items")
-            if (arr != null) {
-                val loaded = mutableListOf<CartItem>()
-                for (i in 0 until arr.length()) {
-                    loaded.add(arr.getJSONObject(i).toCartItem())
-                }
-                _items.value = loaded
-            }
+            _items.value = db.getCartItems("") // Load all; filtered by userId in getCartItems()
         }
     }
 
-    private suspend fun persist() {
-        val arr = JSONArray()
-        _items.value.forEach { arr.put(it.toJson()) }
-        persistence.saveArray("cart_items", arr)
+    private fun emitFromDb(userId: String) {
+        kotlinx.coroutines.runBlocking {
+            _items.value = db.getCartItems("") // Full reload for cross-user compatibility
+        }
     }
 
     override suspend fun addToCart(userId: String, productId: String, productTitle: String, productCover: String, price: Double) {
-        val existing = _items.value.find { it.userId == userId && it.productId == productId }
+        val existing = db.getCartItem(userId, productId)
         if (existing != null) {
-            _items.value = _items.value.map { if (it.id == existing.id) it.copy(quantity = it.quantity + 1) else it }
+            db.updateCartQuantity(existing.id, existing.quantity + 1)
         } else {
-            _items.value = _items.value + CartItem("cart_${SecurityUtils.generateUuid().take(8)}", userId, productId, productTitle, productCover, price)
+            db.insertCartItem(CartItem("cart_${SecurityUtils.generateUuid().take(8)}", userId, productId, productTitle, productCover, price))
         }
-        persist()
+        emitFromDb(userId)
     }
 
-    override suspend fun removeFromCart(itemId: String) { _items.value = _items.value.filter { it.id != itemId }; persist() }
+    override suspend fun removeFromCart(itemId: String) { db.deleteCartItem(itemId); emitFromDb("") }
     override suspend fun updateQuantity(itemId: String, quantity: Int) {
-        if (quantity > 0) _items.value = _items.value.map { if (it.id == itemId) it.copy(quantity = quantity) else it }
-        else _items.value = _items.value.filter { it.id != itemId }
-        persist()
+        if (quantity > 0) db.updateCartQuantity(itemId, quantity)
+        else db.deleteCartItem(itemId)
+        emitFromDb("")
     }
-    override suspend fun clearCart(userId: String) { _items.value = _items.value.filter { it.userId != userId }; persist() }
+    override suspend fun clearCart(userId: String) { db.clearCart(userId); emitFromDb(userId) }
     override fun getCartItems(userId: String): Flow<List<CartItem>> = _items.map { it.filter { item -> item.userId == userId } }
-    override fun getCartCount(userId: String): Flow<Int> = _items.map { it.count { item -> item.userId == userId } }
-    override suspend fun getCartItem(userId: String, productId: String): CartItem? = _items.value.find { it.userId == userId && it.productId == productId }
+    override fun getCartCount(userId: String): Flow<Int> {
+        return _items.map { it.count { item -> item.userId == userId } }
+    }
+    override suspend fun getCartItem(userId: String, productId: String): CartItem? = db.getCartItem(userId, productId)
 }
