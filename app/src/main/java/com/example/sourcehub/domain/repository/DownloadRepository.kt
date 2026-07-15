@@ -11,4 +11,6 @@ interface DownloadRepository {
     suspend fun pauseDownload(downloadId: String)
     suspend fun resumeDownload(downloadId: String)
     suspend fun deleteDownload(downloadId: String)
+    suspend fun updateProgress(downloadId: String, bytes: Long)
+    suspend fun updateCompleted(downloadId: String, localPath: String)
 }

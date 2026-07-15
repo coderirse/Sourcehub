@@ -1,6 +1,9 @@
 package com.example.sourcehub
 
 import android.app.Application
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.os.Build
 import android.util.Log
 import androidx.work.Configuration
 import androidx.work.WorkManager
@@ -18,8 +21,21 @@ class SourcehubApplication : Application(), Configuration.Provider {
         instance = this
         runSecurityChecks()
         appContainer = AppContainer(this)
+        createNotificationChannels()
         WorkManager.initialize(this, workManagerConfiguration)
         Log.i(TAG, "SourceHub Application initialized")
+    }
+
+    private fun createNotificationChannels() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val channel = NotificationChannel(
+                "download_channel",
+                "下载通知",
+                NotificationManager.IMPORTANCE_LOW
+            ).apply { description = "文件下载进度通知" }
+            val manager = getSystemService(NotificationManager::class.java)
+            manager.createNotificationChannel(channel)
+        }
     }
 
     private fun runSecurityChecks() {

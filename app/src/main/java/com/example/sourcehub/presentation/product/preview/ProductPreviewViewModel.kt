@@ -12,6 +12,8 @@ import kotlinx.coroutines.launch
 
 data class ProductPreviewUiState(
     val productTitle: String = "",
+    val productDescription: String = "",
+    val pageCount: Int = 0,
     val isLoading: Boolean = false,
     val error: String? = null
 )
@@ -25,7 +27,14 @@ class ProductPreviewViewModel : ViewModel() {
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true) }
             when (val result = productRepository.getProductDetail(productId)) {
-                is Resource.Success -> _uiState.update { it.copy(isLoading = false, productTitle = result.data.title) }
+                is Resource.Success -> _uiState.update {
+                    it.copy(
+                        isLoading = false,
+                        productTitle = result.data.title,
+                        productDescription = result.data.description,
+                        pageCount = result.data.pageCount
+                    )
+                }
                 is Resource.Error -> _uiState.update { it.copy(isLoading = false, error = result.message) }
                 is Resource.Loading -> {}
             }

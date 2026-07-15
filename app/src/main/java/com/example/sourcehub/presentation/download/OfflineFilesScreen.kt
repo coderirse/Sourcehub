@@ -10,6 +10,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -23,6 +24,7 @@ fun OfflineFilesScreen(
     viewModel: OfflineFilesViewModel = viewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val context = LocalContext.current
 
     Scaffold(
         topBar = {
@@ -48,7 +50,7 @@ fun OfflineFilesScreen(
                                     Text(download.fileName, style = MaterialTheme.typography.bodyMedium)
                                     Text("${download.fileSize / 1024 / 1024}MB", style = MaterialTheme.typography.labelSmall)
                                 }
-                                IconButton(onClick = { viewModel.openFile(download.id) }) { Icon(Icons.Default.OpenInNew, "打开") }
+                                IconButton(onClick = { viewModel.openFile(context, download.id) }) { Icon(Icons.Default.OpenInNew, "打开") }
                                 IconButton(onClick = { viewModel.deleteFile(download.id) }) { Icon(Icons.Default.Delete, "删除", tint = MaterialTheme.colorScheme.error) }
                             }
                         }
