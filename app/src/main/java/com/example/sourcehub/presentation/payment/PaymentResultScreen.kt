@@ -1,5 +1,12 @@
 package com.example.sourcehub.presentation.payment
 
+/**
+ * 支付结果确认页面。
+ *
+ * 根据支付结果显示大型成功/错误图标和消息。
+ * 成功时显示截断的订单ID和金额，并提供查看订单或返回首页的按钮。
+ * 失败时仅显示"返回首页"按钮。
+ */
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CheckCircle
@@ -14,6 +21,18 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 
+/**
+ * 支付结果页面。
+ *
+ * 居中布局，包含图标（勾选圆圈或错误）、标题消息、
+ * 成功时可选的订单详情以及上下文操作按钮。
+ *
+ * @param orderId      订单ID（用于在成功时加载完整详情）
+ * @param success      支付成功时为 true；失败/取消时为 false
+ * @param onViewOrder  导航到订单详情页面的回调
+ * @param onBackHome   返回首页的回调
+ * @param viewModel    提供订单详情的 [PaymentResultViewModel]
+ */
 @Composable
 fun PaymentResultScreen(
     orderId: String,
@@ -25,6 +44,7 @@ fun PaymentResultScreen(
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     LaunchedEffect(orderId) { viewModel.loadOrder(orderId) }
 
+    // 最小化脚手架，无顶部应用栏 — 图标是主要视觉元素
     Scaffold { padding ->
         Column(
             modifier = Modifier.fillMaxSize().padding(padding).padding(32.dp),
@@ -52,6 +72,7 @@ fun PaymentResultScreen(
             )
             if (success && uiState.order != null) {
                 Spacer(Modifier.height(12.dp))
+                // 显示截断的订单ID（前12个字符）和最终金额以供参考
                 Text("订单号: ${uiState.order!!.id.take(12)}...")
                 Text("金额: ¥${String.format("%.2f", uiState.order!!.finalAmount)}")
             }

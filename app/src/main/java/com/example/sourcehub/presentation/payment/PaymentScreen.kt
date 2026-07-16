@@ -1,5 +1,12 @@
 package com.example.sourcehub.presentation.payment
 
+/**
+ * 支付页面组件。
+ *
+ * 渲染支付金额、可选支付方式列表（单选按钮卡片）、
+ * 处理中状态和"立即支付"按钮。
+ * 启用 Android 的 FLAG_SECURE 以防止在此页面上截屏/录屏。
+ */
 import android.view.WindowManager
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -17,6 +24,17 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.sourcehub.domain.model.PaymentMethod
 import com.example.sourcehub.presentation.common.components.LoadingIndicator
 
+/**
+ * 支付页面。
+ *
+ * 突出显示订单的最终金额，将 [PaymentMethod] 条目列为可选卡片，
+ * 并显示处理中指示器或"立即支付"按钮。
+ * 此页面可见时应用截屏保护（FLAG_SECURE）。
+ *
+ * @param orderId           要加载和支付的订单ID
+ * @param onPaymentResult   回调，true 表示成功，false 表示失败/取消
+ * @param viewModel         提供界面状态和操作的 [PaymentViewModel]
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PaymentScreen(
@@ -27,7 +45,7 @@ fun PaymentScreen(
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val view = LocalView.current
 
-    // FLAG_SECURE for payment screen
+    // 在支付页面上防止截屏和录屏
     DisposableEffect(Unit) {
         view.setWindowSecureFlag(true)
         onDispose { view.setWindowSecureFlag(false) }
@@ -35,6 +53,7 @@ fun PaymentScreen(
 
     LaunchedEffect(orderId) { viewModel.loadOrder(orderId) }
     LaunchedEffect(uiState.paymentResult) {
+        // 将支付结果转发给父级（成功 → true，其他 → false）
         when (uiState.paymentResult) {
             is com.example.sourcehub.domain.model.PaymentResult.Success -> onPaymentResult(true)
             is com.example.sourcehub.domain.model.PaymentResult.Failure -> onPaymentResult(false)
@@ -51,6 +70,7 @@ fun PaymentScreen(
             )
         }
     ) { padding ->
+        // 获取订单详情时显示全屏加载指示器
         if (uiState.isLoading) { LoadingIndicator(Modifier.padding(padding)); return@Scaffold }
 
         val order = uiState.order
@@ -71,6 +91,7 @@ fun PaymentScreen(
             Spacer(Modifier.height(16.dp))
 
             PaymentMethod.entries.forEach { method ->
+                // 使用主容器颜色高亮显示已选支付方式的卡片
                 Card(
                     modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp).clickable { viewModel.selectMethod(method) },
                     colors = CardDefaults.cardColors(
@@ -91,6 +112,7 @@ fun PaymentScreen(
             Spacer(Modifier.height(32.dp))
 
             if (uiState.isProcessing) {
+                // 支付进行中时禁用按钮并显示加载旋转指示器
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     CircularProgressIndicator()
                     Spacer(Modifier.height(8.dp))
@@ -108,6 +130,11 @@ fun PaymentScreen(
     }
 }
 
+/**
+ * 在窗口上切换 FLAG_SECURE 的扩展函数，
+ * 当 [enable] 为 true 时防止截屏和录屏，
+ * 为 false 时恢复正常行为。
+ */
 private fun android.view.View.setWindowSecureFlag(enable: Boolean) {
     if (enable) {
         (context as? android.app.Activity)?.window?.addFlags(WindowManager.LayoutParams.FLAG_SECURE)

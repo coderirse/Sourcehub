@@ -1,5 +1,12 @@
 package com.example.sourcehub.presentation.cart
 
+/**
+ * 购物车页面组件。
+ *
+ * 显示用户的购物车，包含可选择的商品、数量控件和结算按钮。
+ * 支持全选、单独切换和动态总计计算。
+ * 当购物车为空时显示空状态占位符。
+ */
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -18,6 +25,17 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import com.example.sourcehub.presentation.common.components.EmptyView
 
+/**
+ * 购物车页面。
+ *
+ * 渲染一个标题为"购物车"的顶部应用栏，一个包含总计摘要的全选行，
+ * 一个包含复选框/图片/标题/价格/数量控件/删除按钮的购物车商品卡片延迟列表，
+ * 以及一个仅当至少选中一个商品时才启用的底部固定结算按钮。
+ *
+ * @param onCheckout  用户点击结算按钮时调用的回调
+ * @param onProductClick  用户点击商品封面图片时调用的回调，接收商品ID
+ * @param viewModel  提供界面状态和操作的 [CartViewModel]
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CartScreen(
@@ -31,13 +49,15 @@ fun CartScreen(
         topBar = { TopAppBar(title = { Text("购物车") }) }
     ) { padding ->
         if (uiState.items.isEmpty()) {
-            EmptyView("购物车是空的", "去逛逛", onAction = { /* navigate to home */ }, modifier = Modifier.padding(padding))
+            // 空状态，显示一个引导用户浏览商品的操作按钮
+            EmptyView("购物车是空的", "去逛逛", onAction = { /* 导航到首页 */ }, modifier = Modifier.padding(padding))
         } else {
             Column(modifier = Modifier.fillMaxSize().padding(padding)) {
                 Row(
                     modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
+                    // 全选复选框：仅当所有商品都被选中时勾选
                     Checkbox(
                         checked = uiState.selectedIds.size == uiState.items.size,
                         onCheckedChange = { viewModel.toggleSelectAll() }

@@ -1,3 +1,8 @@
+/**
+ * 设置页面，提供应用级配置开关：
+ * 仅WiFi下载、生物识别锁定、远程API使用，
+ * 并提供导航至安全设置和关于页面。
+ */
 package com.example.sourcehub.presentation.settings
 
 import androidx.compose.foundation.clickable
@@ -12,6 +17,14 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 
+/**
+ * 设置页面组件。
+ *
+ * @param onNavigateBack 用户点击返回箭头时的回调。
+ * @param onSecuritySettings 用户点击"安全设置"时的回调。
+ * @param onAbout 用户点击"关于"时的回调。
+ * @param viewModel 驱动开关状态和操作的 [SettingsViewModel]。默认为作用域内的 ViewModel。
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsScreen(
@@ -31,7 +44,8 @@ fun SettingsScreen(
         }
     ) { padding ->
         Column(modifier = Modifier.fillMaxSize().padding(padding)) {
-            // Download settings
+            // ---- 下载与安全开关 ----
+
             ListItem(
                 headlineContent = { Text("仅WiFi下载") },
                 trailingContent = {
@@ -47,6 +61,7 @@ fun SettingsScreen(
                 },
                 leadingContent = { Icon(Icons.Default.Fingerprint, null) }
             )
+            // 切换本地与远程（Ktor）API 后端的开关。
             ListItem(
                 headlineContent = { Text("使用远程服务器") },
                 supportingContent = { Text("连接 Ktor 后端 API（需先启动 server/）") },
@@ -56,6 +71,8 @@ fun SettingsScreen(
                 leadingContent = { Icon(Icons.Default.Cloud, null) }
             )
             HorizontalDivider(Modifier.padding(horizontal = 16.dp))
+
+            // ---- 导航条目 ----
 
             ListItem(
                 headlineContent = { Text("安全设置") },
@@ -70,6 +87,8 @@ fun SettingsScreen(
                 modifier = Modifier.clickable(onClick = viewModel::clearCache)
             )
             HorizontalDivider(Modifier.padding(horizontal = 16.dp))
+
+            // ---- 信息条目 ----
 
             ListItem(
                 headlineContent = { Text("关于") },

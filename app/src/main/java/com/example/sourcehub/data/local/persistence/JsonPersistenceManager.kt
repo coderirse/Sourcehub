@@ -8,9 +8,9 @@ import org.json.JSONObject
 import java.io.File
 
 /**
- * JSON-file-based persistence using Android's built-in org.json.
- * No Room, no KAPT, no KSP — zero annotation processing required.
- * Data is stored in app-private filesDir/persist/ as .json files.
+ * 基于 Android 内置 org.json 的 JSON 文件持久化。
+ * 无需 Room、KAPT、KSP — 零注解处理。
+ * 数据以 .json 文件形式存储在应用私有 filesDir/persist/ 目录中。
  */
 class JsonPersistenceManager(context: Context) {
 
@@ -45,7 +45,7 @@ class JsonPersistenceManager(context: Context) {
     }
 }
 
-// Extension helpers for CartItem persistence
+// CartItem 持久化扩展助手
 fun org.json.JSONObject.toCartItem() = com.example.sourcehub.domain.model.CartItem(
     id = getString("id"),
     userId = getString("userId"),
@@ -68,7 +68,7 @@ fun com.example.sourcehub.domain.model.CartItem.toJson() = org.json.JSONObject()
     put("addedAt", addedAt)
 }
 
-// Extension helpers for Download persistence
+// Download 持久化扩展助手
 fun org.json.JSONObject.toDownload() = com.example.sourcehub.domain.model.Download(
     id = getString("id"),
     userId = getString("userId"),
@@ -99,7 +99,7 @@ fun com.example.sourcehub.domain.model.Download.toJson() = org.json.JSONObject()
     put("createdAt", createdAt)
 }
 
-// Extension helpers for User persistence
+// User 持久化扩展助手
 fun org.json.JSONObject.toUser() = com.example.sourcehub.domain.model.User(
     id = getString("id"),
     name = getString("name"),

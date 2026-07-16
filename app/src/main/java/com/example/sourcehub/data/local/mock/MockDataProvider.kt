@@ -2,10 +2,38 @@ package com.example.sourcehub.data.local.mock
 
 import com.example.sourcehub.domain.model.*
 
+/**
+ * 所有模拟 API 实现的集中式内存数据存储。
+ *
+ * 提供涵盖 6 个类别的 20 个商品静态目录和
+ * 3 个促销横幅，以及一个共享的可变支付状态映射，
+ * 供 [MockPaymentApi] 和 [MockOrderApi] 用于同步支付状态。
+ *
+ * ## 共享状态：[paidOrders]
+ *
+ * 当 [MockPaymentApi.createPayment] 成功时，它将 `orderId -> (transactionId, paidTimestamp)`
+ * 写入此映射。[MockOrderApi.syncPaidOrders] 在每次订单
+ * 查询之前读取它，以将订单状态从 PENDING 更新为 PAID。由于两个模拟
+ * 共享同一个 [MockDataProvider] 实例（由 DI 容器注入），
+ * 此跨模块状态会自动同步。
+ *
+ * ## 搜索行为
+ * [searchProducts] 对以下字段进行不区分大小写的子串匹配：
+ * - 商品标题
+ * - 作者名称
+ * - 描述文本
+ * - 标签（每个标签单独检查）
+ */
 class MockDataProvider {
-    // Shared payment state: orderId -> (transactionId, paidTimestamp)
+    /**
+     * 共享支付状态：orderId -> (transactionId, paidTimestamp)。
+     *
+     * 由 [MockPaymentApi] 填充，由 [MockOrderApi] 通过
+     * [syncPaidOrders] 消费。此映射是可变的，在进程生命周期内持续存在。
+     */
     val paidOrders = mutableMapOf<String, Pair<String, Long>>()
 
+    /** 6 个硬编码的商品类别，含中文标签和商品数量。 */
     val categories = listOf(
         Category("cat_1", "简历模板", "description", 0, 42),
         Category("cat_2", "PPT模板", "slideshow", 1, 38),
@@ -15,12 +43,14 @@ class MockDataProvider {
         Category("cat_6", "技术文档", "code", 5, 19)
     )
 
+    /** 3 个用于首页轮播的促销横幅。 */
     val banners = listOf(
         Banner("b1", "精品简历模板合集", "https://picsum.photos/800/300?random=1", BannerLinkType.CATEGORY, "cat_1", 0),
         Banner("b2", "Python编程电子书", "https://picsum.photos/800/300?random=2", BannerLinkType.PRODUCT, "prod_10", 1),
         Banner("b3", "年终总结PPT模板", "https://picsum.photos/800/300?random=3", BannerLinkType.CATEGORY, "cat_2", 2)
     )
 
+    /** 20 个硬编码商品，含真实的中文标题、描述和价格。 */
     val products = listOf(
         Product("prod_1", "高级简历模板 - 创意设计风格", "一套精美的简历模板，适用于设计师和创意行业求职者。包含3种配色方案，支持PDF和DOCX格式导出。", "设计工作室A", 9.90, 19.90, "https://picsum.photos/400/560?random=10", "", FileType.PDF, 2, 1048576, "cat_1", 1280, 4.8f, tags = listOf("简历", "创意", "设计")),
         Product("prod_2", "商务简约简历模板", "经典商务风格简历模板，简洁大方，适合金融、法律、咨询等行业使用。", "简历大师", 6.90, 12.90, "https://picsum.photos/400/560?random=11", "", FileType.DOCX, 2, 2097152, "cat_1", 950, 4.6f, tags = listOf("简历", "商务", "简约")),
@@ -44,6 +74,7 @@ class MockDataProvider {
         Product("prod_20", "企业微信运营SOP手册", "完整的企业微信私域运营标准操作流程手册，包含客户获取、社群运营和转化路径。", "WeComPro", 21.90, 41.90, "https://picsum.photos/400/560?random=29", "", FileType.DOCX, 35, 17825792, "cat_5", 1120, 4.5f, tags = listOf("企业微信", "私域", "运营"))
     )
 
+    /** [MockAuthApi.login] 用作后备的测试账户。 */
     val mockUsers = mapOf(
         "test@sourcehub.com" to User(
             id = "user_001",
@@ -55,9 +86,17 @@ class MockDataProvider {
         )
     )
 
+    /** 根据 ID 查找单个商品，未找到则返回 null。 */
     fun getProductById(id: String): Product? = products.find { it.id == id }
+
+    /** 筛选属于指定类别的商品。 */
     fun getProductsByCategory(categoryId: String): List<Product> =
         products.filter { it.categoryId == categoryId }
+
+    /**
+     * 在商品标题、作者名称、描述
+     * 和标签中进行不区分大小写的搜索。任一字段匹配即包含该商品到结果集中。
+     */
     fun searchProducts(query: String): List<Product> =
         products.filter {
             it.title.contains(query, ignoreCase = true) ||
@@ -65,5 +104,7 @@ class MockDataProvider {
                     it.description.contains(query, ignoreCase = true) ||
                     it.tags.any { tag -> tag.contains(query, ignoreCase = true) }
         }
+
+    /** 根据 ID 查找类别，未找到则返回 null。 */
     fun getCategoryById(id: String): Category? = categories.find { it.id == id }
 }

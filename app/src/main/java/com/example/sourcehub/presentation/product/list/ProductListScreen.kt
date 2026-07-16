@@ -1,3 +1,9 @@
+/**
+ * 按分类筛选并以双列网格展示商品的页面。
+ *
+ * 当 [categoryId] 为空时，该页面展示所有新品商品（最多 50 个）。
+ * 顶部应用栏提供返回箭头和分类名称（或回退标签"全部商品"）的导航功能。
+ */
 package com.example.sourcehub.presentation.product.list
 
 import androidx.compose.foundation.layout.*
@@ -14,6 +20,17 @@ import com.example.sourcehub.presentation.common.components.ErrorView
 import com.example.sourcehub.presentation.common.components.LoadingIndicator
 import com.example.sourcehub.presentation.common.components.ProductCard
 
+/**
+ * 按分类筛选的商品列表页面。
+ *
+ * 使用以 [categoryId] 为键的 [LaunchedEffect]，当所选分类变化时重新加载商品。
+ *
+ * @param categoryId 筛选所用的分类 ID。空字符串表示"全部商品"。
+ * @param categoryName 显示在顶部应用栏中的可读分类名称。
+ * @param onProductClick 用户点击商品卡片时调用，参数为商品 ID。
+ * @param onNavigateBack 用户按下返回箭头时调用。
+ * @param viewModel 驱动此页面的 [ProductListViewModel]。
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProductListScreen(
@@ -24,6 +41,7 @@ fun ProductListScreen(
     viewModel: ProductListViewModel = viewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    // 每当分类变化时重新加载商品。
     LaunchedEffect(categoryId) { viewModel.loadProducts(categoryId) }
 
     Scaffold(
