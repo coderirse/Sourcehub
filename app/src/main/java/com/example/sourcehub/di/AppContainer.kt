@@ -143,7 +143,10 @@ class RetrofitApiSet {
     private val retrofit = ApiClient.build()
 
     val auth: AuthApi = RetrofitAuthApi(retrofit.create(RetrofitAuthService::class.java))
-    val product: ProductApi = RetrofitProductApi(retrofit.create(RetrofitProductService::class.java))
+    val product: ProductApi = RetrofitProductApi(
+        retrofit.create(RetrofitProductService::class.java),
+        retrofit.create(RetrofitBannerService::class.java)
+    )
     val order: OrderApi = RetrofitOrderApi(retrofit.create(RetrofitOrderService::class.java))
     val payment: PaymentApi = RetrofitPaymentApi(retrofit.create(RetrofitPaymentService::class.java))
     val download: DownloadApi = RetrofitDownloadApi(retrofit.create(RetrofitDownloadService::class.java))

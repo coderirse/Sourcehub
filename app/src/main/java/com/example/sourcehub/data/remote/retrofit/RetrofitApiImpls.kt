@@ -22,14 +22,8 @@ import com.example.sourcehub.data.remote.dto.*
  *
  * ## 未实现的端点
  *
- * 一些领域 [Api] 方法还没有对应的 Retrofit 端点
- * （Ktor 后端尚未实现）。这些方法返回带有适当消息的
- * 存根 [ApiResponse]：
- * - [RetrofitAuthApi.forgotPassword] — "服务器端尚未实现"
- * - [RetrofitProductApi.getBanners], [getCategories] — 空列表
- * - [RetrofitOrderApi.cancelOrder] — "服务器端尚未实现"
- * - [RetrofitPaymentApi.verifyPayment], [refundPayment] — "尚未实现"
- * - [RetrofitDownloadApi.reportDownloadProgress] — 空 Unit 响应
+ * 仅 [RetrofitDownloadApi.reportDownloadProgress] 仍为存根
+ * （进度由 [DownloadWorker] 在本地跟踪）。
  */
 
 /**
@@ -44,7 +38,7 @@ class RetrofitAuthApi(private val service: RetrofitAuthService) : AuthApi {
     override suspend fun refreshToken(refreshToken: String) = service.refreshToken(mapOf("refreshToken" to refreshToken))
     override suspend fun getProfile() = service.getProfile()
     override suspend fun updateProfile(request: UpdateProfileRequest) = service.updateProfile(request)
-    override suspend fun forgotPassword(email: String): ApiResponse<Unit> = ApiResponse(message = "Not implemented on server")
+    override suspend fun forgotPassword(email: String) = service.forgotPassword(mapOf("email" to email))
 }
 
 /**
@@ -54,14 +48,17 @@ class RetrofitAuthApi(private val service: RetrofitAuthService) : AuthApi {
  * 因此返回空列表。其他方法直接映射到 Retrofit
  * 调用，并进行适当的查询参数转换。
  */
-class RetrofitProductApi(private val service: RetrofitProductService) : ProductApi {
-    override suspend fun getBanners(): ApiResponse<List<BannerResponse>> = ApiResponse(data = emptyList())
-    override suspend fun getCategories(): ApiResponse<List<CategoryResponse>> = ApiResponse(data = emptyList())
-    override suspend fun getRecommendedProducts(limit: Int) = service.getRecommended()
-    override suspend fun getNewArrivals(limit: Int) = service.getProducts(size = limit, sort = "newest")
-    override suspend fun getProductsByCategory(categoryId: String) = service.getProducts(category = categoryId)
-    override suspend fun getProductDetail(productId: String) = service.getDetail(productId)
-    override suspend fun searchProducts(query: String) = service.search(query)
+class RetrofitProductApi(
+    private val productService: RetrofitProductService,
+    private val bannerService: RetrofitBannerService
+) : ProductApi {
+    override suspend fun getBanners() = bannerService.getBanners()
+    override suspend fun getCategories() = bannerService.getCategories()
+    override suspend fun getRecommendedProducts(limit: Int) = productService.getRecommended()
+    override suspend fun getNewArrivals(limit: Int) = productService.getProducts(size = limit, sort = "newest")
+    override suspend fun getProductsByCategory(categoryId: String) = productService.getProducts(category = categoryId)
+    override suspend fun getProductDetail(productId: String) = productService.getDetail(productId)
+    override suspend fun searchProducts(query: String) = productService.search(query)
 }
 
 /**
@@ -75,7 +72,7 @@ class RetrofitOrderApi(private val service: RetrofitOrderService) : OrderApi {
     override suspend fun createOrder(request: CreateOrderRequest) = service.createOrder(request)
     override suspend fun getOrders(userId: String) = service.getOrders() // userId 在 JWT 中
     override suspend fun getOrderDetail(orderId: String) = service.getOrderDetail(orderId)
-    override suspend fun cancelOrder(orderId: String): ApiResponse<OrderResponse> = ApiResponse(message = "Not implemented on server")
+    override suspend fun cancelOrder(orderId: String) = service.cancelOrder(orderId)
 }
 
 /**
@@ -86,8 +83,8 @@ class RetrofitOrderApi(private val service: RetrofitOrderService) : OrderApi {
  */
 class RetrofitPaymentApi(private val service: RetrofitPaymentService) : PaymentApi {
     override suspend fun createPayment(request: CreatePaymentRequest) = service.pay(request)
-    override suspend fun verifyPayment(transactionId: String): ApiResponse<PaymentResponse> = ApiResponse(message = "Not implemented")
-    override suspend fun refundPayment(orderId: String): ApiResponse<PaymentResponse> = ApiResponse(message = "Not implemented")
+    override suspend fun verifyPayment(transactionId: String) = service.verify(mapOf("transactionId" to transactionId))
+    override suspend fun refundPayment(orderId: String) = service.refund(mapOf("orderId" to orderId))
 }
 
 /**

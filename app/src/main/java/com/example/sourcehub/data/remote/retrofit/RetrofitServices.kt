@@ -42,6 +42,16 @@ interface RetrofitAuthService {
     /** PUT /api/auth/profile — 更新当前用户的个人资料。 */
     @PUT("api/auth/profile")
     suspend fun updateProfile(@Body request: UpdateProfileRequest): ApiResponse<UserProfileResponse>
+
+    /** POST /api/auth/forgot-password — 发送密码重置邮件。 */
+    @POST("api/auth/forgot-password")
+    suspend fun forgotPassword(@Body body: Map<String, String>): ApiResponse<Unit>
+}
+
+/** 横幅和分类端点。 */
+interface RetrofitBannerService {
+    @GET("api/banners") suspend fun getBanners(): ApiResponse<List<BannerResponse>>
+    @GET("api/categories") suspend fun getCategories(): ApiResponse<List<CategoryResponse>>
 }
 
 /**
@@ -92,6 +102,10 @@ interface RetrofitOrderService {
     /** GET /api/orders/{id} — 单个订单详情及订单项。 */
     @GET("api/orders/{id}")
     suspend fun getOrderDetail(@Path("id") id: String): ApiResponse<OrderResponse>
+
+    /** POST /api/orders/{id}/cancel — 取消待支付订单。 */
+    @POST("api/orders/{id}/cancel")
+    suspend fun cancelOrder(@Path("id") id: String): ApiResponse<OrderResponse>
 }
 
 /**
@@ -103,6 +117,14 @@ interface RetrofitPaymentService {
     /** POST /api/payment/pay — 为订单发起支付。 */
     @POST("api/payment/pay")
     suspend fun pay(@Body request: CreatePaymentRequest): ApiResponse<PaymentResponse>
+
+    /** POST /api/payment/verify — 通过交易ID验证支付。 */
+    @POST("api/payment/verify")
+    suspend fun verify(@Body body: Map<String, String>): ApiResponse<PaymentResponse>
+
+    /** POST /api/payment/refund — 为已支付订单退款。 */
+    @POST("api/payment/refund")
+    suspend fun refund(@Body body: Map<String, String>): ApiResponse<PaymentResponse>
 }
 
 /**
