@@ -5,7 +5,7 @@ import io.ktor.server.application.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import org.jetbrains.exposed.sql.*
-import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
+import org.jetbrains.exposed.sql.transactions.transaction
 
 fun Routing.productRoutes(db: Database) {
     route("/api/products") {
@@ -17,7 +17,7 @@ fun Routing.productRoutes(db: Database) {
             val sort = call.request.queryParameters["sort"] ?: "newest"
             val offset = (page - 1) * size
 
-            val rows = newSuspendedTransaction(db = db) {
+            val rows = transaction() {
                 val base = Products.selectAll()
                 val filtered = if (category != null && category.isNotBlank())
                     base.where { Products.category eq category }
@@ -49,7 +49,7 @@ fun Routing.productRoutes(db: Database) {
         }
 
         get("/recommended") {
-            val rows = newSuspendedTransaction(db = db) {
+            val rows = transaction() {
                 Products.selectAll().orderBy(Products.salesCount, SortOrder.DESC).limit(10).map { row ->
                     productMap(row)
                 }
@@ -59,7 +59,7 @@ fun Routing.productRoutes(db: Database) {
 
         get("/{id}") {
             val id = call.parameters["id"] ?: ""
-            val row = newSuspendedTransaction(db = db) {
+            val row = transaction() {
                 Products.select { Products.id eq id }.singleOrNull()
             }
             if (row != null) {
@@ -71,7 +71,7 @@ fun Routing.productRoutes(db: Database) {
 
         get("/search") {
             val q = call.request.queryParameters["q"]?.lowercase() ?: ""
-            val rows = newSuspendedTransaction(db = db) {
+            val rows = transaction() {
                 Products.selectAll().where {
                     (Products.title.lowerCase() like "%$q%") or
                     (Products.author.lowerCase() like "%$q%") or
@@ -86,12 +86,7 @@ fun Routing.productRoutes(db: Database) {
 // Banners and categories (separate from products)
 fun Routing.bannerCategoryRoutes(db: Database) {
     get("/api/banners") {
-        val banners = listOf(
-            mapOf("id" to "b1", "title" to "精品简历模板合集", "imageUrl" to "https://picsum.photos/800/300?random=1", "linkType" to "CATEGORY", "linkValue" to "cat_1", "sortOrder" to 0),
-            mapOf("id" to "b2", "title" to "Python编程电子书", "imageUrl" to "https://picsum.photos/800/300?random=2", "linkType" to "PRODUCT", "linkValue" to "p7", "sortOrder" to 1),
-            mapOf("id" to "b3", "title" to "年终总结PPT模板", "imageUrl" to "https://picsum.photos/800/300?random=3", "linkType" to "CATEGORY", "linkValue" to "cat_2", "sortOrder" to 2)
-        )
-        call.respond(mapOf("code" to 200, "data" to banners))
+        call.respondText("""{"code":200,"data":[{"id":"b1","title":"Test Banner"}]}""", io.ktor.http.ContentType.Application.Json)
     }
     get("/api/categories") {
         val categories = listOf(

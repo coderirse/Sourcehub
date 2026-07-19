@@ -7,7 +7,7 @@ import io.ktor.server.auth.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
-import kotlinx.serialization.Serializable
+
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
 import java.util.*
@@ -76,6 +76,6 @@ fun Routing.paymentRoutes(jwtManager: JwtManager, db: Database) {
     }
 }
 
-@Serializable data class PayRequest(val orderId: String, val amount: Double, val method: String = "WECHAT")
-@Serializable data class VerifyRequest(val transactionId: String)
-@Serializable data class RefundRequest(val orderId: String)
+ data class PayRequest(val orderId: String, val amount: Double, val method: String = "WECHAT")
+ data class VerifyRequest(val transactionId: String)
+ data class RefundRequest(val orderId: String)

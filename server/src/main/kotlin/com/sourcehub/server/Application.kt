@@ -4,7 +4,7 @@ import com.sourcehub.server.config.AppConfig
 import com.sourcehub.server.plugins.*
 import com.sourcehub.server.routes.*
 import com.sourcehub.server.security.JwtManager
-import io.ktor.serialization.kotlinx.json.*
+import io.ktor.serialization.gson.*
 import io.ktor.server.application.*
 import io.ktor.server.auth.*
 import io.ktor.server.auth.jwt.*
@@ -17,7 +17,6 @@ import io.ktor.server.plugins.compression.*
 import io.ktor.server.plugins.statuspages.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
-import kotlinx.serialization.json.Json
 
 fun main() {
     embeddedServer(Netty, port = AppConfig.fromEnvironment().port, host = "0.0.0.0") {
@@ -38,7 +37,7 @@ fun Application.module() {
         allowNonSimpleContentTypes = true
     }
     install(ContentNegotiation) {
-        json(Json { ignoreUnknownKeys = true; prettyPrint = true; isLenient = true })
+        gson { setPrettyPrinting() }
     }
     install(StatusPages) {
         exception<Throwable> { call, cause ->

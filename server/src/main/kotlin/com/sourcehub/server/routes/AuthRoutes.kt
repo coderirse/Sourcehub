@@ -10,7 +10,7 @@ import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import io.ktor.server.auth.*
 import io.ktor.server.auth.jwt.*
-import kotlinx.serialization.Serializable
+
 import org.jetbrains.exposed.sql.*
 import java.util.*
 
@@ -145,8 +145,8 @@ fun Routing.authRoutes(jwtManager: JwtManager, db: Database) {
     }
 }
 
-@Serializable data class LoginRequest(val email: String, val password: String)
-@Serializable data class RegisterRequest(val name: String, val email: String, val password: String)
-@Serializable data class ForgotPasswordRequest(val email: String)
-@Serializable data class RefreshRequest(val refreshToken: String)
-@Serializable data class UpdateProfileRequest(val name: String? = null, val avatarUrl: String? = null, val phone: String? = null)
+ data class LoginRequest(val email: String, val password: String)
+ data class RegisterRequest(val name: String, val email: String, val password: String)
+ data class ForgotPasswordRequest(val email: String)
+ data class RefreshRequest(val refreshToken: String)
+ data class UpdateProfileRequest(val name: String? = null, val avatarUrl: String? = null, val phone: String? = null)

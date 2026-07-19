@@ -1,6 +1,5 @@
 plugins {
-    kotlin("jvm") version "2.2.10"
-    kotlin("plugin.serialization") version "2.2.10"
+    kotlin("jvm") version "2.0.21"
     id("io.ktor.plugin") version "3.1.1"
     application
 }
@@ -28,9 +27,9 @@ dependencies {
     implementation("io.ktor:ktor-server-compression:3.1.1")
     implementation("io.ktor:ktor-server-default-headers:3.1.1")
 
-    // Serialization
-    implementation("io.ktor:ktor-serialization-kotlinx-json:3.1.1")
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.3")
+    // Serialization (Gson — handles heterogeneous maps)
+    implementation("io.ktor:ktor-serialization-gson:3.1.1")
+    implementation("com.google.code.gson:gson:2.11.0")
 
     // Database (Exposed ORM + H2 for local dev)
     implementation("org.jetbrains.exposed:exposed-core:0.49.0")
@@ -50,5 +49,5 @@ dependencies {
 
     // Testing
     testImplementation("io.ktor:ktor-server-test-host:3.1.1")
-    testImplementation("org.jetbrains.kotlin:kotlin-test:2.1.20")
+    testImplementation("org.jetbrains.kotlin:kotlin-test:2.0.21")
 }

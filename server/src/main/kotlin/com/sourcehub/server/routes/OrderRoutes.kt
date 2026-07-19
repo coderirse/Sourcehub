@@ -7,7 +7,7 @@ import io.ktor.server.auth.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
-import kotlinx.serialization.Serializable
+
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
 import java.util.*
@@ -135,9 +135,9 @@ fun Routing.orderRoutes(jwtManager: JwtManager, db: Database) {
     }
 }
 
-@Serializable data class CreateOrderRequest(
+ data class CreateOrderRequest(
     val items: List<OrderItemReq>,
     val couponCode: String = "",
     val paymentMethod: String = "WECHAT"
 )
-@Serializable data class OrderItemReq(val productId: String, val quantity: Int)
+ data class OrderItemReq(val productId: String, val quantity: Int)
